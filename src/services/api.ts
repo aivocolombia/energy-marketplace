@@ -1,10 +1,16 @@
 import axios from 'axios';
-import type { AuthResponse, User, EnergyOffer, Transaction } from '../types';
+import { EnergyOffer, AuthResponse, ApiResponse, Transaction } from '../types';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api', // Cambiar según tu backend
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
+// Interceptor para agregar el token a las peticiones
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -15,54 +21,39 @@ api.interceptors.request.use((config) => {
 
 export const authAPI = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    // Mock de respuesta
-    return {
-      token: 'mock-token',
-      user: {
-        id: '1',
-        email,
-        name: 'Usuario Demo',
-        role: 'buyer',
-      },
-    };
+    const response = await api.post('/auth/login', { email, password });
+    return response.data;
   },
-  register: async (userData: Partial<User>): Promise<AuthResponse> => {
-    // Mock de respuesta
-    return {
-      token: 'mock-token',
-      user: {
-        id: '1',
-        email: userData.email!,
-        name: userData.name!,
-        role: userData.role!,
-      },
-    };
+  register: async (name: string, email: string, password: string, role: string): Promise<AuthResponse> => {
+    const response = await api.post('/auth/register', { name, email, password, role });
+    return response.data;
   },
 };
 
 export const offersAPI = {
   getOffers: async (): Promise<EnergyOffer[]> => {
-    // Mock de respuesta
-    return [
-      {
-        id: '1',
-        sellerId: '2',
-        quantity: 100,
-        pricePerKwh: 0.15,
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 86400000).toISOString(),
-        status: 'active',
-      },
-    ];
+    const response = await api.get<ApiResponse<EnergyOffer[]>>('/offers/active');
+    return response.data.data || [];
   },
-  createOffer: async (offer: Partial<EnergyOffer>): Promise<EnergyOffer> => {
-    // Mock de respuesta
-    return {
-      id: Math.random().toString(),
-      sellerId: '2',
-      ...offer,
-      status: 'active',
-    } as EnergyOffer;
+
+  getMyOffers: async (): Promise<EnergyOffer[]> => {
+    const response = await api.get<ApiResponse<EnergyOffer[]>>('/offers/my-offers');
+    return response.data.data || [];
+  },
+
+  createOffer: async (offerData: Partial<EnergyOffer>): Promise<EnergyOffer> => {
+    const response = await api.post<ApiResponse<EnergyOffer>>('/offers/create', offerData);
+    return response.data.data!;
+  },
+
+  updateOfferPrice: async (offerId: string, newPrice: number): Promise<EnergyOffer> => {
+    const response = await api.put<ApiResponse<EnergyOffer>>(`/offers/${offerId}/price`, { price: newPrice });
+    return response.data.data!;
+  },
+
+  purchaseOffer: async (offerId: string, amount: number): Promise<EnergyOffer> => {
+    const response = await api.post<ApiResponse<EnergyOffer>>(`/offers/${offerId}/purchase`, { amount });
+    return response.data.data!;
   },
 };
 
