@@ -14,7 +14,7 @@ interface TransactionModalProps {
   onClose: () => void;
 }
 
-type SortField = 'createdAt' | 'type' | 'energyAmount' | 'totalPrice' | 'status' | 'counterparty';
+type SortField = 'createdAt' | 'type' | 'energyAmount' | 'totalPrice' | 'status' | 'counterparty' | 'buyer';
 type SortDirection = 'asc' | 'desc';
 
 function TransactionModal({ transaction, isOpen, onClose }: TransactionModalProps) {
@@ -190,7 +190,9 @@ export default function Transactions() {
           formatCurrency(transaction.totalPrice),
           transaction.status,
           counterparty?.name || '',
-          counterparty?.email || ''
+          counterparty?.email || '',
+          transaction.buyer?.name || '',
+          transaction.buyer?.email || ''
         ];
         return searchableValues.some(value => 
           value.toLowerCase().includes(searchLower)
@@ -216,6 +218,8 @@ export default function Transactions() {
           return a.status.localeCompare(b.status) * direction;
         case 'counterparty':
           return ((counterpartyA?.name || '').localeCompare(counterpartyB?.name || '')) * direction;
+        case 'buyer':
+          return ((a.buyer?.name || '').localeCompare(b.buyer?.name || '')) * direction;
         default:
           return 0;
       }
@@ -275,15 +279,13 @@ export default function Transactions() {
                 <table className="min-w-full divide-y divide-white/20">
                   <thead className="bg-white/5 backdrop-blur-sm">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                        ID
-                      </th>
                       {renderSortableHeader('createdAt', 'Fecha')}
                       {renderSortableHeader('type', 'Tipo')}
                       {renderSortableHeader('energyAmount', 'Cantidad')}
                       {renderSortableHeader('totalPrice', 'Precio Total')}
                       {renderSortableHeader('status', 'Estado')}
                       {renderSortableHeader('counterparty', user?.role === 'buyer' ? 'Vendedor' : 'Comprador')}
+                      {renderSortableHeader('buyer', 'Comprador')}
                     </tr>
                   </thead>
                 </table>
@@ -300,9 +302,6 @@ export default function Transactions() {
                             onClick={() => setSelectedTransaction(transaction)}
                             className="hover:bg-white/10 cursor-pointer transition-colors"
                           >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                              #{transaction._id.slice(0, 8)}
-                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                               {format(new Date(transaction.createdAt), 'PPp', { locale: es })}
                             </td>
@@ -322,6 +321,9 @@ export default function Transactions() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                               {counterparty?.name || 'Usuario no disponible'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                              {transaction.buyer?.name || 'Usuario no disponible'}
                             </td>
                           </tr>
                         );
