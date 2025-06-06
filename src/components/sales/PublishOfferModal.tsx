@@ -87,13 +87,21 @@ const TIPOS_ENERGIA = [
 interface PublishOfferModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess?: (newOffer: any) => void;
+  onConfirm: () => Promise<void>;
+  offerData: {
+    energyAmount: string;
+    price: string;
+    location: string;
+    availableFrom: Date | null;
+    availableTo: Date | null;
+  };
 }
 
 const PublishOfferModal: React.FC<PublishOfferModalProps> = ({
   open,
   onClose,
-  onSuccess
+  onConfirm,
+  offerData
 }) => {
   const [formData, setFormData] = useState({
     energyAmount: '',
@@ -166,7 +174,6 @@ const PublishOfferModal: React.FC<PublishOfferModalProps> = ({
         availableTo: formData.availableTo!.toISOString()
       };
 
-      // Validación adicional de los datos
       if (!offerData.type || !['solar', 'hidráulica', 'biomasa', 'eólica'].includes(offerData.type)) {
         throw new Error('Tipo de energía no válido');
       }
@@ -187,9 +194,7 @@ const PublishOfferModal: React.FC<PublishOfferModalProps> = ({
       const newOffer = await energyOfferService.createOffer(offerData);
       console.log('Respuesta:', newOffer);
       
-      if (onSuccess) {
-        onSuccess(newOffer);
-      }
+      await onConfirm();
       
       onClose();
       setFormData({

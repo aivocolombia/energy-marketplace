@@ -125,7 +125,6 @@ export const offersAPI = {
 
   async createOffer(offerData: Partial<EnergyOffer>): Promise<EnergyOffer> {
     try {
-      // Aseguramos que los campos requeridos estén presentes
       const requiredFields = ['energyAmount', 'pricePerUnit', 'location', 'type', 'availableFrom', 'availableTo'] as const;
       const missingFields = requiredFields.filter(field => !(field in offerData));
       
@@ -135,14 +134,13 @@ export const offersAPI = {
 
       const response = await api.post<ApiResponse<{offer: EnergyOffer; transaction: any}>>('/energy-offers/create', {
         ...offerData,
-        status: 'activa' // Aseguramos que el estado inicial sea 'activa'
+        status: 'activa' 
       });
 
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Error al crear la oferta');
       }
 
-      // Verificamos que la respuesta tenga todos los campos necesarios
       const { offer } = response.data.data;
       if (!offer.seller || !offer.type || !offer.status) {
         throw new Error('La respuesta del servidor no incluye todos los campos necesarios');

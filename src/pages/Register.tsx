@@ -8,7 +8,7 @@ export default function Register() {
     email: '',
     password: '',
     name: '',
-    role: 'buyer',
+    role: 'buyer' as 'buyer' | 'seller',
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -17,8 +17,7 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    // Validaciones básicas
+    
     if (!formData.name.trim()) {
       setError('El nombre es requerido');
       return;
@@ -36,13 +35,16 @@ export default function Register() {
     
     try {
       const response = await authAPI.register(formData);
+      if (!response?.user || !response?.token) {
+        throw new Error('Respuesta de registro inválida');
+      }
       setAuth(response.user, response.token);
       navigate('/dashboard');
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al registrar usuario');
+      setError('Error al registrar usuario');
       }
       console.error('Error en registro:', err);
     }

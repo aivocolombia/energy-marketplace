@@ -46,15 +46,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     socket.on('newOffer', (newOffer: EnergyOffer) => {
-      setOffers(prevOffers => [newOffer, ...prevOffers]);
+      if (newOffer.status === 'activa') {
+        setOffers(prevOffers => {
+          const offerExists = prevOffers.some(offer => offer._id === newOffer._id);
+          if (!offerExists) {
+            return [newOffer, ...prevOffers];
+          }
+          return prevOffers;
+        });
+      }
     });
 
     socket.on('updateOffer', (updatedOffer: EnergyOffer) => {
-      setOffers(prevOffers =>
-        prevOffers
-          .map(offer => offer._id === updatedOffer._id ? updatedOffer : offer)
-          .filter(offer => offer.status === 'activa')
-      );
+      setOffers(prevOffers => {
+        const offersWithoutUpdated = prevOffers.filter(offer => offer._id !== updatedOffer._id);
+        if (updatedOffer.status === 'activa') {
+          return [updatedOffer, ...offersWithoutUpdated];
+        }
+        return offersWithoutUpdated;
+      });
     });
 
     return () => {
@@ -76,11 +86,7 @@ export default function Dashboard() {
 
   const handleBuyOffer = async (offerId: string, amount: number) => {
     try {
-      const updatedOffer = await offersAPI.purchaseOffer(offerId, amount);
-      setOffers(prevOffers =>
-        prevOffers
-          .filter(offer => offer._id !== updatedOffer._id)
-      );
+      await offersAPI.purchaseOffer(offerId, amount);
       handleCloseModal();
     } catch (error) {
       console.error('Error purchasing offer:', error);
@@ -89,7 +95,6 @@ export default function Dashboard() {
   };
 
   const handleOfferCreated = (newOffer: EnergyOffer) => {
-    setOffers(prevOffers => [newOffer, ...prevOffers]);
     setIsPublishModalOpen(false);
   };
 

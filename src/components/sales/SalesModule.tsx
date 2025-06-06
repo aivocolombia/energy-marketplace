@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Container, Paper, Grid } from '@mui/material';
+import { Box, Typography, Container, Paper } from '@mui/material';
 import SalesStats from './SalesStats';
 import ActiveSalesList from './ActiveSalesList';
 import CreateSaleForm from './CreateSaleForm';
@@ -28,34 +28,32 @@ const SalesModule: React.FC<SalesModuleProps> = ({ userRole }) => {
         Panel de Ventas
       </Typography>
       
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'grid', gap: 3 }}>
         {/* Estadísticas de ventas */}
-        <Grid item xs={12}>
+        <Box>
           <Paper sx={{ p: 2 }}>
             <SalesStats />
           </Paper>
-        </Grid>
+        </Box>
 
-        {/* Formulario para crear nueva venta */}
-        <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+          {/* Formulario para crear nueva venta */}
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Crear Nueva Oferta
             </Typography>
             <CreateSaleForm />
           </Paper>
-        </Grid>
 
-        {/* Lista de ventas activas */}
-        <Grid item xs={12} md={6}>
+          {/* Lista de ventas activas */}
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Ofertas Activas
             </Typography>
             <ActiveSalesList />
           </Paper>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 };

@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { register, login, getProfile } from '../controllers/auth.controller';
+import { register, login, getProfile } from '../controllers/authController';
 import { protect } from '../middleware/auth';
 import { body } from 'express-validator';
 import { validateRequest } from '../middleware/validate';
+import { RequestHandler } from 'express';
 
 const router = Router();
 
@@ -22,8 +23,8 @@ const loginValidation = [
   validateRequest
 ];
 
-router.post('/register', registerValidation, register);
-router.post('/login', loginValidation, login);
-router.get('/profile', protect, getProfile);
+router.post('/register', registerValidation, register as RequestHandler);
+router.post('/login', loginValidation, login as RequestHandler);
+router.get('/profile', protect as RequestHandler, getProfile as RequestHandler);
 
 export default router; 

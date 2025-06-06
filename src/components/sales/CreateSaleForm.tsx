@@ -3,7 +3,6 @@ import {
   Box,
   TextField,
   Button,
-  Grid,
   Alert,
   CircularProgress
 } from '@mui/material';
@@ -97,32 +96,28 @@ const CreateSaleForm: React.FC = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
       <Box component="form" onSubmit={handleOpenModal} sx={{ mt: 2 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              name="energyAmount"
-              label="Cantidad de Energía (kWh)"
-              type="number"
-              fullWidth
-              required
-              value={formData.energyAmount}
-              onChange={handleChange}
-              inputProps={{ min: 0, step: 0.1 }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              name="price"
-              label="Precio por kWh ($)"
-              type="number"
-              fullWidth
-              required
-              value={formData.price}
-              onChange={handleChange}
-              inputProps={{ min: 0, step: 0.01 }}
-            />
-          </Grid>
-          <Grid item xs={12}>
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+          <TextField
+            name="energyAmount"
+            label="Cantidad de Energía (kWh)"
+            type="number"
+            fullWidth
+            required
+            value={formData.energyAmount}
+            onChange={handleChange}
+            inputProps={{ min: 0, step: 0.1 }}
+          />
+          <TextField
+            name="price"
+            label="Precio por kWh ($)"
+            type="number"
+            fullWidth
+            required
+            value={formData.price}
+            onChange={handleChange}
+            inputProps={{ min: 0, step: 0.01 }}
+          />
+          <Box sx={{ gridColumn: '1 / -1' }}>
             <TextField
               name="location"
               label="Ubicación"
@@ -131,28 +126,24 @@ const CreateSaleForm: React.FC = () => {
               value={formData.location}
               onChange={handleChange}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <DateTimePicker
-              label="Disponible Desde"
-              value={formData.availableFrom}
-              onChange={(newValue) => {
-                setFormData(prev => ({ ...prev, availableFrom: newValue }));
-              }}
-              slotProps={{ textField: { fullWidth: true, required: true } }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <DateTimePicker
-              label="Disponible Hasta"
-              value={formData.availableTo}
-              onChange={(newValue) => {
-                setFormData(prev => ({ ...prev, availableTo: newValue }));
-              }}
-              slotProps={{ textField: { fullWidth: true, required: true } }}
-            />
-          </Grid>
-        </Grid>
+          </Box>
+          <DateTimePicker
+            label="Disponible Desde"
+            value={formData.availableFrom}
+            onChange={(newValue) => {
+              setFormData(prev => ({ ...prev, availableFrom: newValue }));
+            }}
+            slotProps={{ textField: { fullWidth: true, required: true } }}
+          />
+          <DateTimePicker
+            label="Disponible Hasta"
+            value={formData.availableTo}
+            onChange={(newValue) => {
+              setFormData(prev => ({ ...prev, availableTo: newValue }));
+            }}
+            slotProps={{ textField: { fullWidth: true, required: true } }}
+          />
+        </Box>
 
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>

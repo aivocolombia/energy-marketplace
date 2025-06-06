@@ -4,7 +4,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import authRoutes from './routes/authRoutes';
+import authRoutes from './routes/auth.routes';
 import energyOfferRoutes from './routes/energyOfferRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import { Server } from 'socket.io';
