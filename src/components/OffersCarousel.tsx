@@ -16,11 +16,14 @@ const OffersCarousel: React.FC<OffersCarouselProps> = ({ offers, onOpenModal }) 
 
   const activeOffers = useMemo(() => {
     const now = new Date();
-    return offers.filter(offer => 
-      offer.status === 'activa' && 
-      new Date(offer.availableFrom) <= now && 
-      new Date(offer.availableTo) >= now
-    );
+    return offers
+      .filter(offer => 
+        offer.status === 'activa' && 
+        new Date(offer.availableFrom) <= now && 
+        new Date(offer.availableTo) >= now
+      )
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10);
   }, [offers]);
 
   useEffect(() => {
@@ -47,6 +50,38 @@ const OffersCarousel: React.FC<OffersCarouselProps> = ({ offers, onOpenModal }) 
 
   return (
     <div className="relative overflow-hidden">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-900">Ofertas Activas</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setCurrentIndex(prev => (prev > 0 ? prev - 1 : activeOffers.length - 1))}
+            className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setCurrentIndex(prev => (prev < activeOffers.length - 1 ? prev + 1 : 0))}
+            className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+          >
+            {isPaused ? (
+              <PlayIcon className="h-5 w-5" />
+            ) : (
+              <PauseIcon className="h-5 w-5" />
+            )}
+          </button>
+        </div>
+      </div>
+
       <div 
         ref={containerRef}
         className="flex transition-transform duration-1000 ease-in-out"
@@ -65,9 +100,9 @@ const OffersCarousel: React.FC<OffersCarouselProps> = ({ offers, onOpenModal }) 
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {offer.type.charAt(0).toUpperCase() + offer.type.slice(1)}
+                        {offer.type ? offer.type.charAt(0).toUpperCase() + offer.type.slice(1) : 'N/A'}
                       </h3>
-                      <p className="text-sm text-gray-500">{offer.location}</p>
+                      <p className="text-sm text-gray-500">{offer.location || 'N/A'}</p>
                     </div>
                     <span className={`px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800`}>
                       Activa
@@ -106,18 +141,6 @@ const OffersCarousel: React.FC<OffersCarouselProps> = ({ offers, onOpenModal }) 
         })}
       </div>
 
-      {activeOffers.length > 1 && (
-        <button
-          onClick={() => setIsPaused(!isPaused)}
-          className="absolute bottom-4 right-4 p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
-        >
-          {isPaused ? (
-            <PlayIcon className="h-6 w-6 text-white" />
-          ) : (
-            <PauseIcon className="h-6 w-6 text-white" />
-          )}
-        </button>
-      )}
     </div>
   );
 };

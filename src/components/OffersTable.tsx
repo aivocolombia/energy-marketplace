@@ -209,29 +209,29 @@ const OffersTable: React.FC<OffersTableProps> = ({ offers, onOpenModal }) => {
                           `}
                         >
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                            {offer.type.charAt(0).toUpperCase() + offer.type.slice(1)}
+                            {offer.type ? offer.type.charAt(0).toUpperCase() + offer.type.slice(1) : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                            {offer.seller.name}
+                            {offer.seller?.name || 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                            {offer.energyAmount} kWh
+                            {offer.energyAmount ? `${offer.energyAmount} kWh` : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                            ${offer.pricePerUnit}
+                            ${offer.pricePerUnit || 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                            {offer.location}
+                            {offer.location || 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                            {format(new Date(offer.availableFrom), 'PPp', { locale: es })}
+                            {offer.availableFrom ? format(new Date(offer.availableFrom), 'PPp', { locale: es }) : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                            {format(new Date(offer.availableTo), 'PPp', { locale: es })}
+                            {offer.availableTo ? format(new Date(offer.availableTo), 'PPp', { locale: es }) : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(status)}`}>
-                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                              {status ? status.charAt(0).toUpperCase() + status.slice(1) : 'N/A'}
                             </span>
                           </td>
                         </tr>

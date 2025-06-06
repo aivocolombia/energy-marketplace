@@ -166,6 +166,23 @@ const PublishOfferModal: React.FC<PublishOfferModalProps> = ({
         availableTo: formData.availableTo!.toISOString()
       };
 
+      // Validación adicional de los datos
+      if (!offerData.type || !['solar', 'hidráulica', 'biomasa', 'eólica'].includes(offerData.type)) {
+        throw new Error('Tipo de energía no válido');
+      }
+
+      if (!offerData.location.trim()) {
+        throw new Error('La ubicación es requerida');
+      }
+
+      if (isNaN(offerData.energyAmount) || offerData.energyAmount <= 0) {
+        throw new Error('La cantidad de energía debe ser mayor que 0');
+      }
+
+      if (isNaN(offerData.pricePerUnit) || offerData.pricePerUnit <= 0) {
+        throw new Error('El precio por unidad debe ser mayor que 0');
+      }
+
       console.log('Enviando oferta:', offerData);
       const newOffer = await energyOfferService.createOffer(offerData);
       console.log('Respuesta:', newOffer);

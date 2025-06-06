@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { EnergyOffer, AuthResponse, ApiResponse, Transaction } from '../types';
+import { EnergyOffer, AuthResponse, ApiResponse, Transaction, User } from '../types';
 import { API_BASE_URL, CONFIG } from '../config';
 
 const api = axios.create({
@@ -71,6 +71,19 @@ export const authAPI = {
     }
   },
 
+  getProfile: async (): Promise<User> => {
+    try {
+      const response = await api.get<ApiResponse<{ user: User }>>('/auth/profile');
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al obtener el perfil');
+      }
+      return response.data.data.user;
+    } catch (error) {
+      console.error('Error al obtener perfil:', error);
+      throw error;
+    }
+  },
+
   logout: () => {
     localStorage.removeItem('token');
   }
@@ -105,11 +118,30 @@ export const offersAPI = {
 
   async createOffer(offerData: Partial<EnergyOffer>): Promise<EnergyOffer> {
     try {
-      const response = await api.post<ApiResponse<EnergyOffer>>('/energy-offers/create', offerData);
-      if (!response.data.success) {
+      // Aseguramos que los campos requeridos estén presentes
+      const requiredFields = ['energyAmount', 'pricePerUnit', 'location', 'type', 'availableFrom', 'availableTo'] as const;
+      const missingFields = requiredFields.filter(field => !(field in offerData));
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Faltan campos requeridos: ${missingFields.join(', ')}`);
+      }
+
+      const response = await api.post<ApiResponse<{offer: EnergyOffer; transaction: any}>>('/energy-offers/create', {
+        ...offerData,
+        status: 'activa' // Aseguramos que el estado inicial sea 'activa'
+      });
+
+      if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Error al crear la oferta');
       }
-      return response.data.data!;
+
+      // Verificamos que la respuesta tenga todos los campos necesarios
+      const { offer } = response.data.data;
+      if (!offer.seller || !offer.type || !offer.status) {
+        throw new Error('La respuesta del servidor no incluye todos los campos necesarios');
+      }
+
+      return offer;
     } catch (error) {
       console.error('Error al crear oferta:', error);
       throw error;

@@ -81,7 +81,7 @@ export const createOffer = async (req: AuthRequest, res: Response) => {
     });
 
     await offer.save({ session });
-    await offer.populate('seller', 'name email');
+    await offer.populate('seller', 'name email role');
 
     const transaction = new Transaction({
       seller: req.userId,
@@ -95,17 +95,25 @@ export const createOffer = async (req: AuthRequest, res: Response) => {
     });
 
     await transaction.save({ session });
-    await transaction.populate('seller', 'name email');
+    await transaction.populate('seller', 'name email role');
 
     await session.commitTransaction();
 
-    io.emit('newOffer', offer);
+    const populatedOffer = await EnergyOffer.findById(offer._id)
+      .populate('seller', 'name email role')
+      .lean();
+
+    if (!populatedOffer) {
+      throw new Error('Error al crear la oferta: no se pudo recuperar la oferta poblada');
+    }
+
+    io.emit('newOffer', populatedOffer);
     io.emit('newTransaction', transaction);
 
     res.status(201).json({
       success: true,
       data: {
-        offer,
+        offer: populatedOffer,
         transaction
       }
     });
