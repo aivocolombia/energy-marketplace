@@ -123,6 +123,24 @@ export const createOffer = async (req: AuthRequest, res: Response) => {
 
 export const getAllOffers = async (req: Request, res: Response) => {
   try {
+    const offers = await EnergyOffer.find()
+      .populate('seller', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: offers
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener las ofertas'
+    });
+  }
+};
+
+export const getActiveOffers = async (req: Request, res: Response) => {
+  try {
     const now = new Date();
     
     const offers = await EnergyOffer.find({ 

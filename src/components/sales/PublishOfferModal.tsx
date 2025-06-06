@@ -136,8 +136,8 @@ const PublishOfferModal: React.FC<PublishOfferModalProps> = ({
       newErrors.location = 'Selecciona una ubicación';
     }
 
-    if (!formData.type) {
-      newErrors.type = 'Selecciona un tipo de energía';
+    if (!formData.type || !['solar', 'hidráulica', 'biomasa', 'eólica'].includes(formData.type)) {
+      newErrors.type = 'Selecciona un tipo de energía válido';
     }
 
     if (!formData.availableFrom || !formData.availableTo) {
@@ -161,12 +161,14 @@ const PublishOfferModal: React.FC<PublishOfferModalProps> = ({
         energyAmount: Number(formData.energyAmount),
         pricePerUnit: Number(formData.pricePerUnit),
         location: formData.location,
-        type: formData.type,
+        type: formData.type as 'solar' | 'hidráulica' | 'biomasa' | 'eólica',
         availableFrom: formData.availableFrom!.toISOString(),
         availableTo: formData.availableTo!.toISOString()
       };
 
+      console.log('Enviando oferta:', offerData);
       const newOffer = await energyOfferService.createOffer(offerData);
+      console.log('Respuesta:', newOffer);
       
       if (onSuccess) {
         onSuccess(newOffer);
@@ -182,6 +184,7 @@ const PublishOfferModal: React.FC<PublishOfferModalProps> = ({
         availableTo: null
       });
     } catch (error) {
+      console.error('Error al crear oferta:', error);
       setErrors(prev => ({
         ...prev,
         submit: error instanceof Error ? error.message : 'Error al crear la oferta'

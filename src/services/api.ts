@@ -3,7 +3,7 @@ import { EnergyOffer, AuthResponse, ApiResponse, Transaction } from '../types';
 import { API_BASE_URL, CONFIG } from '../config';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -79,7 +79,7 @@ export const authAPI = {
 export const offersAPI = {
   async getOffers(): Promise<EnergyOffer[]> {
     try {
-      const response = await api.get<ApiResponse<EnergyOffer[]>>('/energy-offers/active');
+      const response = await api.get<ApiResponse<EnergyOffer[]>>('/energy-offers/all');
       if (!response.data.success) {
         throw new Error(response.data.message || 'Error al obtener las ofertas');
       }

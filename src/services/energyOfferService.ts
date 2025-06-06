@@ -16,7 +16,15 @@ export const energyOfferService = {
   },
 
   async createOffer(offerData: CreateOfferData): Promise<EnergyOffer> {
-    return offersAPI.createOffer(offerData);
+    try {
+      console.log('Datos de la oferta a crear:', offerData);
+      const offer = await offersAPI.createOffer(offerData);
+      console.log('Oferta creada:', offer);
+      return offer;
+    } catch (error) {
+      console.error('Error en energyOfferService.createOffer:', error);
+      throw error;
+    }
   },
 
   async updateOfferPrice(offerId: string, newPrice: number): Promise<EnergyOffer> {

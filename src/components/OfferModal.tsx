@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EnergyOffer } from '../types';
 import { formatCurrency } from '../utils/format';
 
@@ -6,7 +6,7 @@ interface OfferModalProps {
   offer: EnergyOffer;
   isOpen: boolean;
   onClose: () => void;
-  onConfirmPurchase: (amount: number) => Promise<void>;
+  onConfirmPurchase: (offerId: string, amount: number) => Promise<void>;
 }
 
 export default function OfferModal({ offer, isOpen, onClose, onConfirmPurchase }: OfferModalProps) {
@@ -14,25 +14,17 @@ export default function OfferModal({ offer, isOpen, onClose, onConfirmPurchase }
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setPurchaseAmount(offer.energyAmount);
-  }, [offer]);
-
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!purchaseAmount || purchaseAmount <= 0 || purchaseAmount > offer.energyAmount) {
-      setError('La cantidad debe ser mayor a 0 y no puede exceder la cantidad disponible');
-      return;
-    }
+    setIsLoading(true);
+    setError(null);
 
     try {
-      setIsLoading(true);
-      setError(null);
-      await onConfirmPurchase(purchaseAmount);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al procesar la compra');
+      await onConfirmPurchase(offer._id, purchaseAmount);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Error al procesar la compra');
     } finally {
       setIsLoading(false);
     }
@@ -62,72 +54,41 @@ export default function OfferModal({ offer, isOpen, onClose, onConfirmPurchase }
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Detalles de la Oferta
+                Comprar Energía
               </h3>
 
-              <div className="mt-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Cantidad disponible
-                    </label>
-                    <p className="mt-1 text-sm text-gray-900">{offer.energyAmount} kWh</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Precio por kWh
-                    </label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(offer.pricePerUnit)}</p>
-                  </div>
-                </div>
+              <div className="mt-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {error && (
+                    <div className="rounded-md bg-red-50 p-4">
+                      <div className="flex">
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-red-800">
+                            {error}
+                          </h3>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Vendedor
-                  </label>
-                  <p className="mt-1 text-sm text-gray-900">{offer.seller.name}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Ubicación
-                  </label>
-                  <p className="mt-1 text-sm text-gray-900">{offer.location}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Tipo de energía
-                  </label>
-                  <p className="mt-1 text-sm text-gray-900">{offer.type}</p>
-                </div>
-
-                <form onSubmit={handleSubmit}>
                   <div>
                     <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                      Cantidad a comprar (kWh)
+                      Cantidad (kWh)
                     </label>
                     <input
                       type="number"
                       name="amount"
                       id="amount"
+                      min="0"
+                      max={offer.energyAmount}
+                      step="0.01"
                       value={purchaseAmount}
-                      onChange={(e) => {
-                        const value = Math.min(offer.energyAmount, Math.max(0, Number(e.target.value)));
-                        setPurchaseAmount(value);
-                        setError(null);
-                      }}
+                      onChange={(e) => setPurchaseAmount(Number(e.target.value))}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
                     />
                   </div>
 
-                  {error && (
-                    <div className="mt-2 text-sm text-red-600">
-                      {error}
-                    </div>
-                  )}
-
-                  <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                  <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <button
                       type="submit"
                       disabled={isLoading}

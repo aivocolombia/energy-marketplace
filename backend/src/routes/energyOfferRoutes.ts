@@ -14,4 +14,7 @@ router.post('/create', authorize('seller') as RequestHandler, energyOfferControl
 router.put('/:offerId/price', authorize('seller') as RequestHandler, energyOfferController.updateOfferPrice as RequestHandler);
 router.post('/:offerId/purchase', authorize('buyer') as RequestHandler, energyOfferController.buyOffer as RequestHandler);
 
+router.get('/all', energyOfferController.getAllOffers as RequestHandler);
+router.get('/active', energyOfferController.getActiveOffers as RequestHandler);
+
 export default router; 
