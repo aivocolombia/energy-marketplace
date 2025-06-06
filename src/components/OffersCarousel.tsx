@@ -17,17 +17,21 @@ const OffersCarousel: React.FC<OffersCarouselProps> = ({ offers, onOpenModal }) 
   const activeOffers = useMemo(() => {
     const now = new Date();
     return offers
-      .filter(offer => 
-        offer.status === 'activa' && 
-        new Date(offer.availableFrom) <= now && 
-        new Date(offer.availableTo) >= now
-      )
+      .filter(offer => {
+        const availableFrom = new Date(offer.availableFrom);
+        const availableTo = new Date(offer.availableTo);
+        return (
+          offer.status === 'activa' && 
+          now >= availableFrom && 
+          now <= availableTo
+        );
+      })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10);
   }, [offers]);
 
   useEffect(() => {
-    if (!isPaused && activeOffers.length > 0) {
+    if (!isPaused && activeOffers.length > 3) {
       const interval = setInterval(() => {
         setCurrentIndex((prevIndex) => {
           const nextIndex = prevIndex + 1;
@@ -46,40 +50,43 @@ const OffersCarousel: React.FC<OffersCarouselProps> = ({ offers, onOpenModal }) 
     return null;
   }
 
-  const translateX = -currentIndex * (100 / Math.min(3, activeOffers.length));
+  const itemsToShow = Math.min(3, activeOffers.length);
+  const translateX = -currentIndex * (100 / itemsToShow);
 
   return (
     <div className="relative overflow-hidden">
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-900">Ofertas Activas</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentIndex(prev => (prev > 0 ? prev - 1 : activeOffers.length - 1))}
-            className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-          </button>
-          <button
-            onClick={() => setCurrentIndex(prev => (prev < activeOffers.length - 1 ? prev + 1 : 0))}
-            className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-          <button
-            onClick={() => setIsPaused(!isPaused)}
-            className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
-          >
-            {isPaused ? (
-              <PlayIcon className="h-5 w-5" />
-            ) : (
-              <PauseIcon className="h-5 w-5" />
-            )}
-          </button>
-        </div>
+        {activeOffers.length > 3 && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentIndex(prev => (prev > 0 ? prev - 1 : activeOffers.length - 1))}
+              className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setCurrentIndex(prev => (prev < activeOffers.length - 1 ? prev + 1 : 0))}
+              className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setIsPaused(!isPaused)}
+              className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+            >
+              {isPaused ? (
+                <PlayIcon className="h-5 w-5" />
+              ) : (
+                <PauseIcon className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       <div 

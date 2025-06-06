@@ -49,17 +49,17 @@ export default function Dashboard() {
       setOffers(prevOffers => [newOffer, ...prevOffers]);
     });
 
-    socket.on('offerUpdated', (updatedOffer: EnergyOffer) => {
+    socket.on('updateOffer', (updatedOffer: EnergyOffer) => {
       setOffers(prevOffers =>
-        prevOffers.map(offer =>
-          offer._id === updatedOffer._id ? updatedOffer : offer
-        )
+        prevOffers
+          .map(offer => offer._id === updatedOffer._id ? updatedOffer : offer)
+          .filter(offer => offer.status === 'activa')
       );
     });
 
     return () => {
       socket.off('newOffer');
-      socket.off('offerUpdated');
+      socket.off('updateOffer');
     };
   }, []);
 
@@ -78,9 +78,8 @@ export default function Dashboard() {
     try {
       const updatedOffer = await offersAPI.purchaseOffer(offerId, amount);
       setOffers(prevOffers =>
-        prevOffers.map(offer =>
-          offer._id === updatedOffer._id ? updatedOffer : offer
-        )
+        prevOffers
+          .filter(offer => offer._id !== updatedOffer._id)
       );
       handleCloseModal();
     } catch (error) {

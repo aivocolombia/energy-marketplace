@@ -55,9 +55,14 @@ export const authAPI = {
     }
   },
 
-  register: async (name: string, email: string, password: string, role: 'buyer' | 'seller'): Promise<AuthResponse['data']> => {
+  register: async (userData: { 
+    name: string, 
+    email: string, 
+    password: string, 
+    role: 'buyer' | 'seller' 
+  }): Promise<AuthResponse['data']> => {
     try {
-      const response = await api.post<AuthResponse>('/auth/register', { name, email, password, role });
+      const response = await api.post<AuthResponse>('/auth/register', userData);
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Error en el registro');
       }
@@ -66,8 +71,10 @@ export const authAPI = {
       
       return response.data.data;
     } catch (error) {
-      console.error('Error en registro:', error);
-      throw error;
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Error en el registro');
     }
   },
 

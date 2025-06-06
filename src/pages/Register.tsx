@@ -17,13 +17,34 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validaciones básicas
+    if (!formData.name.trim()) {
+      setError('El nombre es requerido');
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError('El correo electrónico es requerido');
+      return;
+    }
+
+    if (!formData.password || formData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
     
     try {
       const response = await authAPI.register(formData);
       setAuth(response.user, response.token);
       navigate('/dashboard');
     } catch (err) {
-      setError('Error al registrar usuario');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Error al registrar usuario');
+      }
+      console.error('Error en registro:', err);
     }
   };
 

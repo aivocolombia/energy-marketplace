@@ -84,17 +84,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       leaveFrom="transform opacity-100 scale-100"
                       leaveTo="transform opacity-0 scale-95"
                     >
-                      <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-xl glass-dark py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-xl bg-gray-900/95 backdrop-blur-lg py-1 shadow-lg ring-1 ring-white/10 focus:outline-none">
                         {/* Información del usuario */}
                         <div className="px-4 py-3 border-b border-white/10">
                           <p className="text-sm text-white font-medium truncate">
                             {user?.name}
                           </p>
-                          <p className="text-xs text-white/70 truncate mt-1">
+                          <p className="text-xs text-white/80 truncate mt-1">
                             {user?.email}
                           </p>
                           <div className="mt-2">
-                            <span className="inline-flex items-center rounded-full bg-erco-secondary/20 px-2 py-1 text-xs font-medium text-erco-secondary">
+                            <span className="inline-flex items-center rounded-full bg-erco-secondary/20 px-2 py-1 text-xs font-medium text-erco-secondary ring-1 ring-erco-secondary/30">
                               {getRoleText(user?.role || '')}
                             </span>
                           </div>
@@ -105,8 +105,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             <button
                               onClick={handleLogout}
                               className={`${
-                                active ? 'bg-white/5' : ''
-                              } block w-full px-4 py-2 text-left text-sm text-white/80 hover:text-white transition-colors duration-200`}
+                                active ? 'bg-white/10' : ''
+                              } block w-full px-4 py-2 text-left text-sm text-white hover:text-white transition-colors duration-200`}
                             >
                               Cerrar sesión
                             </button>

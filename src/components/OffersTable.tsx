@@ -74,6 +74,10 @@ const OffersTable: React.FC<OffersTableProps> = ({ offers, onOpenModal }) => {
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       result = result.filter((offer) => {
+        const now = new Date();
+        const availableTo = new Date(offer.availableTo);
+        const currentStatus = now > availableTo ? 'expirada' : offer.status;
+        
         const searchableValues = [
           offer.type,
           offer.seller.name,
@@ -82,7 +86,7 @@ const OffersTable: React.FC<OffersTableProps> = ({ offers, onOpenModal }) => {
           offer.location,
           format(new Date(offer.availableFrom), 'PPp', { locale: es }),
           format(new Date(offer.availableTo), 'PPp', { locale: es }),
-          isExpired(offer.availableTo) ? 'expirada' : offer.status
+          currentStatus
         ];
         return searchableValues.some(value => 
           value.toLowerCase().includes(searchLower)

@@ -11,11 +11,33 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { email, password, name, role } = req.body;
 
+    // Validaciones
+    if (!email || !password || !name || !role) {
+      return res.status(400).json({
+        success: false,
+        message: 'Todos los campos son requeridos'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'La contraseña debe tener al menos 6 caracteres'
+      });
+    }
+
+    if (!['buyer', 'seller'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rol no válido'
+      });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'El usuario ya existe'
+        message: 'Ya existe un usuario con este correo electrónico'
       });
     }
 
