@@ -1,19 +1,6 @@
 import mongoose from 'mongoose';
 
-export interface IEnergyOffer {
-  seller: mongoose.Types.ObjectId;
-  energyAmount: number;  // en kWh
-  pricePerUnit: number; // precio por kWh
-  location: string;
-  availableFrom: Date;
-  availableTo: Date;
-  status: 'active' | 'pending' | 'completed' | 'cancelled';
-  type: 'solar' | 'wind' | 'hydro' | 'other';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const energyOfferSchema = new mongoose.Schema<IEnergyOffer>({
+const energyOfferSchema = new mongoose.Schema({
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -29,6 +16,11 @@ const energyOfferSchema = new mongoose.Schema<IEnergyOffer>({
     required: true,
     min: 0
   },
+  type: {
+    type: String,
+    enum: ['solar', 'eólica', 'hidráulica', 'biomasa'],
+    required: true
+  },
   location: {
     type: String,
     required: true
@@ -43,24 +35,17 @@ const energyOfferSchema = new mongoose.Schema<IEnergyOffer>({
   },
   status: {
     type: String,
-    enum: ['active', 'pending', 'completed', 'cancelled'],
-    default: 'active'
+    enum: ['activa', 'vendida', 'cancelada'],
+    default: 'activa'
   },
-  type: {
-    type: String,
-    enum: ['solar', 'hidráulica', 'biomasa', 'solar', 'eólica',],
-    required: true
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
-}, {
-  timestamps: true
 });
 
-// Índices para búsquedas eficientes
+energyOfferSchema.index({ seller: 1, createdAt: -1 });
 energyOfferSchema.index({ status: 1, availableFrom: 1, availableTo: 1 });
-energyOfferSchema.index({ seller: 1, status: 1 });
-energyOfferSchema.index({ location: 1 });
-energyOfferSchema.index({ pricePerUnit: 1 });
+energyOfferSchema.index({ type: 1 });
 
-const EnergyOffer = mongoose.model<IEnergyOffer>('EnergyOffer', energyOfferSchema);
-
-export default EnergyOffer; 
+export const EnergyOffer = mongoose.model('EnergyOffer', energyOfferSchema); 

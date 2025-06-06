@@ -1,36 +1,17 @@
-import express from 'express';
-import { energyOfferController } from '../controllers/energyOfferController';
-import { authMiddleware } from '../middleware/authMiddleware';
-import { roleMiddleware } from '../middleware/roleMiddleware';
+import express, { RequestHandler } from 'express';
+import { protect, authorize } from '../middleware/auth';
+import * as energyOfferController from '../controllers/energyOfferController';
+import { AuthRequest } from '../types/express';
 
 const router = express.Router();
 
-// Rutas protegidas que requieren autenticación
-router.use(authMiddleware);
+router.use(protect as RequestHandler);
 
-// Rutas para vendedores
-router.post(
-  '/create',
-  roleMiddleware(['seller']),
-  energyOfferController.createOffer
-);
+router.get('/active', energyOfferController.getAllOffers as RequestHandler);
+router.get('/my-offers', authorize('seller') as RequestHandler, energyOfferController.getSellerOffers as RequestHandler);
 
-router.put(
-  '/:offerId/price',
-  roleMiddleware(['seller']),
-  energyOfferController.updatePrice
-);
-
-router.get(
-  '/my-offers',
-  roleMiddleware(['seller']),
-  energyOfferController.getSellerOffers
-);
-
-// Rutas accesibles para compradores y vendedores
-router.get(
-  '/active',
-  energyOfferController.getActiveOffers
-);
+router.post('/create', authorize('seller') as RequestHandler, energyOfferController.createOffer as RequestHandler);
+router.put('/:offerId/price', authorize('seller') as RequestHandler, energyOfferController.updateOfferPrice as RequestHandler);
+router.post('/:offerId/purchase', authorize('buyer') as RequestHandler, energyOfferController.buyOffer as RequestHandler);
 
 export default router; 

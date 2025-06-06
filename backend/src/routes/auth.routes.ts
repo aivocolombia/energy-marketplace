@@ -6,7 +6,6 @@ import { validateRequest } from '../middleware/validate';
 
 const router = Router();
 
-// Validación para registro
 const registerValidation = [
   body('name').trim().notEmpty().withMessage('El nombre es requerido'),
   body('email').isEmail().withMessage('Ingresa un email válido'),
@@ -17,7 +16,6 @@ const registerValidation = [
   validateRequest
 ];
 
-// Validación para login
 const loginValidation = [
   body('email').isEmail().withMessage('Ingresa un email válido'),
   body('password').notEmpty().withMessage('La contraseña es requerida'),

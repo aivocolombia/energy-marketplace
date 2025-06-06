@@ -21,13 +21,13 @@ export interface EnergyOffer {
   energyAmount: number;
   pricePerUnit: number;
   location: string;
-  availableFrom: Date;
-  availableTo: Date;
-  status: 'active' | 'pending' | 'completed' | 'cancelled';
-  type: 'solar' | 'wind' | 'hydro' | 'other';
-  completedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  type: 'solar' | 'hidráulica' | 'biomasa' | 'eólica';
+  status: 'activa' | 'pendiente' | 'vendida' | 'cancelada';
+  availableFrom: string;
+  availableTo: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ApiResponse<T> {
@@ -36,12 +36,24 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
-export type Transaction = {
-  id: string;
-  offerId: string;
-  buyerId: string;
-  sellerId: string;
-  quantity: number;
+export interface Transaction {
+  _id: string;
+  seller: User;
+  buyer: User;
+  offer: EnergyOffer;
+  energyAmount: number;
+  pricePerUnit: number;
   totalPrice: number;
-  date: string;
-}; 
+  type: 'solar' | 'hidráulica' | 'biomasa' | 'eólica';
+  status: 'pendiente' | 'completada' | 'cancelada';
+  createdAt: string;
+  completedAt?: string;
+  updatedAt: string;
+}
+
+export interface PriceUpdate {
+  type: 'solar' | 'hidráulica' | 'biomasa' | 'eólica';
+  location: string;
+  newPrice: number;
+  timestamp: string;
+} 

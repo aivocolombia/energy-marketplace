@@ -1,21 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User, IUser } from '../models/User';
+import { User } from '../models/User';
+import { AuthRequest } from '../types/express';
 
 interface JwtPayload {
-  id: string;
-  role: string;
+  userId: string;
 }
 
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser;
+      userId?: string;
     }
   }
 }
 
-export const protect = async (req: Request, res: Response, next: NextFunction) => {
+export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     let token;
 
@@ -30,28 +30,37 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-    const user = await User.findById(decoded.id).select('-password');
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+      
+      const user = await User.findById(decoded.userId).select('name email role');
+      
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
 
-    if (!user) {
+      req.user = user;
+      req.userId = user._id;
+      next();
+    } catch (error) {
       return res.status(401).json({
         success: false,
-        message: 'Token no válido o expirado'
+        message: 'Token inválido'
       });
     }
-
-    req.user = user;
-    next();
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: 'No autorizado para acceder a esta ruta'
+      message: 'Error en la autenticación'
     });
   }
 };
 
 export const authorize = (...roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -62,7 +71,7 @@ export const authorize = (...roles: string[]) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: 'No tiene permiso para realizar esta acción'
+        message: `El rol ${req.user.role} no está autorizado para acceder a esta ruta`
       });
     }
 

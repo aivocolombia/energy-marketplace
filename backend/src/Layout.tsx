@@ -85,6 +85,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       leaveTo="transform opacity-0 scale-95"
                     >
                       <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-xl glass-dark py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        {/* Información del usuario */}
                         <div className="px-4 py-3 border-b border-white/10">
                           <p className="text-sm text-white font-medium truncate">
                             {user?.name}
@@ -98,6 +99,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             </span>
                           </div>
                         </div>
+                        {/* Botón de cerrar sesión */}
                         <Menu.Item>
                           {({ active }) => (
                             <button
@@ -145,6 +147,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 ))}
               </div>
               <div className="border-t border-white/10 pb-3 pt-4">
+                {/* Información del usuario en móvil */}
                 <div className="px-4 py-3">
                   <p className="text-base font-medium text-white">
                     {user?.name}

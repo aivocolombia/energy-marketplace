@@ -15,11 +15,15 @@ export default function Login() {
     setError('');
     
     try {
-      const response = await authAPI.login(email, password);
-      setAuth(response.user, response.token);
+      const data = await authAPI.login(email, password);
+      if (!data) {
+        throw new Error('No se recibieron datos del servidor');
+      }
+      setAuth(data.user, data.token);
       navigate('/dashboard');
     } catch (err) {
-      setError('Credenciales inválidas');
+      console.error('Error en login:', err);
+      setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     }
   };
 

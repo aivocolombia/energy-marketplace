@@ -1,75 +1,191 @@
 import axios from 'axios';
 import { EnergyOffer, AuthResponse, ApiResponse, Transaction } from '../types';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { API_BASE_URL, CONFIG } from '../config';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
+  timeout: CONFIG.API.TIMEOUT,
+  timeoutErrorMessage: 'El servidor tardó demasiado en responder'
 });
 
-// Interceptor para agregar el token a las peticiones
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    console.error('Error en la solicitud:', error);
+    return Promise.reject(error);
   }
-  return config;
-});
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const authAPI = {
-  login: async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await api.post('/auth/login', { email, password });
-    return response.data;
+  login: async (email: string, password: string): Promise<AuthResponse['data']> => {
+    try {
+      const response = await api.post<AuthResponse>('/auth/login', { email, password });
+      
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error en el inicio de sesión');
+      }
+      
+      localStorage.setItem('token', response.data.data.token);
+      
+      return response.data.data;
+    } catch (error) {
+      console.error('Error en login:', error);
+      throw error;
+    }
   },
-  register: async (name: string, email: string, password: string, role: string): Promise<AuthResponse> => {
-    const response = await api.post('/auth/register', { name, email, password, role });
-    return response.data;
+
+  register: async (name: string, email: string, password: string, role: 'buyer' | 'seller'): Promise<AuthResponse['data']> => {
+    try {
+      const response = await api.post<AuthResponse>('/auth/register', { name, email, password, role });
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error en el registro');
+      }
+      
+      localStorage.setItem('token', response.data.data.token);
+      
+      return response.data.data;
+    } catch (error) {
+      console.error('Error en registro:', error);
+      throw error;
+    }
   },
+
+  logout: () => {
+    localStorage.removeItem('token');
+  }
 };
 
 export const offersAPI = {
-  getOffers: async (): Promise<EnergyOffer[]> => {
-    const response = await api.get<ApiResponse<EnergyOffer[]>>('/offers/active');
-    return response.data.data || [];
+  async getOffers(): Promise<EnergyOffer[]> {
+    try {
+      const response = await api.get<ApiResponse<EnergyOffer[]>>('/energy-offers/active');
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al obtener las ofertas');
+      }
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error al obtener ofertas:', error);
+      throw error;
+    }
   },
 
-  getMyOffers: async (): Promise<EnergyOffer[]> => {
-    const response = await api.get<ApiResponse<EnergyOffer[]>>('/offers/my-offers');
-    return response.data.data || [];
+  async getMyOffers(): Promise<EnergyOffer[]> {
+    try {
+      const response = await api.get<ApiResponse<EnergyOffer[]>>('/energy-offers/my-offers');
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al obtener mis ofertas');
+      }
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error al obtener mis ofertas:', error);
+      throw error;
+    }
   },
 
-  createOffer: async (offerData: Partial<EnergyOffer>): Promise<EnergyOffer> => {
-    const response = await api.post<ApiResponse<EnergyOffer>>('/offers/create', offerData);
-    return response.data.data!;
+  async createOffer(offerData: Partial<EnergyOffer>): Promise<EnergyOffer> {
+    try {
+      const response = await api.post<ApiResponse<EnergyOffer>>('/energy-offers/create', offerData);
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al crear la oferta');
+      }
+      return response.data.data!;
+    } catch (error) {
+      console.error('Error al crear oferta:', error);
+      throw error;
+    }
   },
 
-  updateOfferPrice: async (offerId: string, newPrice: number): Promise<EnergyOffer> => {
-    const response = await api.put<ApiResponse<EnergyOffer>>(`/offers/${offerId}/price`, { price: newPrice });
-    return response.data.data!;
+  async purchaseOffer(offerId: string, amount: number): Promise<EnergyOffer> {
+    try {
+      console.log('Purchasing offer:', { offerId, amount });
+      const response = await api.post<ApiResponse<EnergyOffer>>(`/energy-offers/${offerId}/purchase`, { 
+        amount,
+        purchaseDate: new Date().toISOString()
+      });
+      
+      console.log('Purchase response:', response.data);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al comprar la oferta');
+      }
+      return response.data.data!;
+    } catch (error) {
+      console.error('Error purchasing offer:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('permiso')) {
+          throw new Error('Solo los compradores pueden realizar compras de energía');
+        }
+      }
+      throw error;
+    }
   },
 
-  purchaseOffer: async (offerId: string, amount: number): Promise<EnergyOffer> => {
-    const response = await api.post<ApiResponse<EnergyOffer>>(`/offers/${offerId}/purchase`, { amount });
-    return response.data.data!;
-  },
+  async updateOfferPrice(offerId: string, newPrice: number): Promise<EnergyOffer> {
+    try {
+      const response = await api.put<ApiResponse<EnergyOffer>>(`/energy-offers/${offerId}/price`, { 
+        price: newPrice 
+      });
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al actualizar el precio');
+      }
+      return response.data.data!;
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes('permiso')) {
+          throw new Error('Solo los vendedores pueden actualizar sus ofertas');
+        }
+      }
+      throw error;
+    }
+  }
 };
 
 export const transactionsAPI = {
-  getTransactions: async (): Promise<Transaction[]> => {
-    // Mock de respuesta
-    return [
-      {
-        id: '1',
-        offerId: '1',
-        buyerId: '1',
-        sellerId: '2',
-        quantity: 50,
-        totalPrice: 7.5,
-        date: new Date().toISOString(),
-      },
-    ];
+  async getTransactions(): Promise<Transaction[]> {
+    try {
+      const response = await api.get<ApiResponse<Transaction[]>>('/transactions');
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al obtener las transacciones');
+      }
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error al obtener transacciones:', error);
+      throw error;
+    }
   },
+
+  async getTransactionDetails(transactionId: string): Promise<Transaction> {
+    try {
+      const response = await api.get<ApiResponse<Transaction>>(`/transactions/${transactionId}`);
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al obtener los detalles de la transacción');
+      }
+      return response.data.data!;
+    } catch (error) {
+      console.error('Error al obtener detalles de transacción:', error);
+      throw error;
+    }
+  }
 }; 
