@@ -1,13 +1,91 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luxury Motors Colombia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+</head>
+<body class="bg-black text-white overflow-x-hidden">
+  <!-- Header -->
+  <header class="fixed top-0 left-0 w-full flex justify-between items-center p-4 z-10 bg-black/60 backdrop-blur">
+    <a href="index.html"><img src="https://87autos.com/cdn/shop/files/logos-04_224ff7b9-c066-40d8-a14b-4ffa0f0a2efa.png?v=1727127568&width=200" alt="Logo" class="h-10"></a>
+    <nav class="space-x-6 text-sm md:text-base">
+      <a href="index.html" class="hover:text-gray-300">Inicio</a>
+      <a href="marketplace.html" class="hover:text-gray-300">Marketplace</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section with Video -->
+  <section class="relative h-screen w-full">
+    <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover">
+      <source src="https://cdn.coverr.co/videos/coverr-driving-in-the-city-6004/1080p.mp4" type="video/mp4" />
+    </video>
+    <div class="absolute inset-0 bg-black/70"></div>
+    <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+      <h1 class="text-4xl md:text-6xl font-bold mb-4" data-aos="fade-up">Conquista la carretera</h1>
+      <p class="text-xl md:text-2xl" data-aos="fade-up" data-aos-delay="200">BMW & MINI Cooper en Colombia</p>
+    </div>
+  </section>
+
+  <!-- Featured Models -->
+  <section class="py-16 px-4 md:px-16 bg-black" data-aos="fade-up">
+    <h2 class="text-3xl mb-8 text-center">Modelos Destacados</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="relative overflow-hidden rounded-lg" data-aos="zoom-in">
+        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="BMW" class="w-full h-56 object-cover transition-transform duration-500 hover:scale-110" />
+        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+          <span class="text-white font-semibold">BMW Serie</span>
+        </div>
+      </div>
+      <div class="relative overflow-hidden rounded-lg" data-aos="zoom-in">
+        <img src="https://images.unsplash.com/photo-1511910849309-0f45fe3b250f?auto=format&fit=crop&w=800&q=80" alt="Mini Cooper" class="w-full h-56 object-cover transition-transform duration-500 hover:scale-110" />
+        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+          <span class="text-white font-semibold">MINI Cooper</span>
+        </div>
+      </div>
+      <div class="relative overflow-hidden rounded-lg" data-aos="zoom-in">
+        <img src="https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=800&q=80" alt="BMW" class="w-full h-56 object-cover transition-transform duration-500 hover:scale-110" />
+        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+          <span class="text-white font-semibold">BMW Coupé</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-300 py-10 px-4 md:px-16">
+    <div class="grid md:grid-cols-3 gap-8">
+      <div>
+        <img src="https://87autos.com/cdn/shop/files/logos-04_224ff7b9-c066-40d8-a14b-4ffa0f0a2efa.png?v=1727127568&width=200" alt="Logo" class="h-10 mb-4" />
+        <p>Carrera 7 #123-45, Bogotá, Colombia</p>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold mb-2 text-white">Contacto</h3>
+        <p>Teléfono: +57 300 1234567</p>
+        <p>WhatsApp: +57 300 1234567</p>
+        <p>Email: info@luxurymotors.co</p>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold mb-2 text-white">Horarios</h3>
+        <p>Lunes a Viernes: 8:00 - 18:00</p>
+        <p>Sábado: 9:00 - 13:00</p>
+        <div class="flex space-x-4 mt-4">
+          <a href="#" class="hover:text-white">Instagram</a>
+          <a href="#" class="hover:text-white">Facebook</a>
+          <a href="#" class="hover:text-white">YouTube</a>
+        </div>
+      </div>
+    </div>
+    <div class="text-center text-sm mt-8 border-t border-gray-700 pt-4">
+      &copy; 2024 Luxury Motors Colombia
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+</body>
 </html>
